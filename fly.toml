@@ -16,6 +16,8 @@ primary_region = 'nrt'
   [[services.ports]]
     port = 8303
 
+[checks]
+
 [[vm]]
   size = 'shared-cpu-1x'
   memory = '256'
