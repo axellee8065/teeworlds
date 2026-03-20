@@ -1,15 +1,21 @@
-app = "teeworlds-axellee"
-primary_region = "nrt"
+# fly.toml app configuration file generated for teeworlds-axellee on 2026-03-20T19:10:05+09:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'teeworlds-axellee'
+primary_region = 'nrt'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [[services]]
+  protocol = 'udp'
   internal_port = 8303
-  protocol = "udp"
+
   [[services.ports]]
     port = 8303
 
-[vm]
-  size = "shared-cpu-1x"
-  memory = 256
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '256'
