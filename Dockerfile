@@ -1,13 +1,16 @@
-FROM debian:buster-slim AS builder
+FROM debian:bullseye-slim AS builder
 
 RUN apt-get update && apt-get install -y \
     build-essential \
-    python \
+    python3 \
     zlib1g-dev \
     git \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
+
+# python3 -> python symlink
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Install bam 0.4.0 build tool
 RUN git clone https://github.com/matricks/bam.git /tmp/bam && \
@@ -23,7 +26,7 @@ COPY . .
 RUN bam -a server_release
 
 # --- Runtime stage ---
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 RUN apt-get update && apt-get install -y \
     zlib1g \
