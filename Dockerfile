@@ -43,6 +43,14 @@ COPY --from=builder /build/teeworlds_srv .
 COPY --from=builder /build/data ./data
 COPY --from=builder /build/storage.cfg .
 
+# Download official maps
+RUN apt-get update && apt-get install -y git && \
+    git clone https://github.com/teeworlds/teeworlds-maps.git /tmp/maps && \
+    cp /tmp/maps/*.map data/maps/ && \
+    rm -rf /tmp/maps && \
+    apt-get purge -y git && apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy entrypoint and config
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
