@@ -10,9 +10,10 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /build
 
-# Install bam build tool
+# Install bam 0.4.0 build tool (teeworlds requires 0.4.x, not 0.5.x)
 RUN git clone https://github.com/matricks/bam.git /tmp/bam && \
     cd /tmp/bam && \
+    git checkout v0.4.0 && \
     ./make_unix.sh && \
     cp bam /usr/local/bin/
 
