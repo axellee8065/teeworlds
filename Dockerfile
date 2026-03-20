@@ -1,19 +1,15 @@
-FROM debian:bookworm-slim AS builder
+FROM debian:buster-slim AS builder
 
 RUN apt-get update && apt-get install -y \
     build-essential \
-    python3 \
+    python \
     zlib1g-dev \
     git \
-    wget \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
 
-# python3 -> python symlink (bam scripts use 'python')
-RUN ln -s /usr/bin/python3 /usr/bin/python
-
-# Install bam 0.4.0 build tool (teeworlds requires 0.4.x, not 0.5.x)
+# Install bam 0.4.0 build tool
 RUN git clone https://github.com/matricks/bam.git /tmp/bam && \
     cd /tmp/bam && \
     git checkout v0.4.0 && \
@@ -23,15 +19,14 @@ RUN git clone https://github.com/matricks/bam.git /tmp/bam && \
 # Copy source
 COPY . .
 
-# Build server only (no SDL/freetype needed for dedicated server)
+# Build server only
 RUN bam -a server_release
 
 # --- Runtime stage ---
-FROM debian:bookworm-slim
+FROM debian:buster-slim
 
 RUN apt-get update && apt-get install -y \
     zlib1g \
-    socat \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -d /home/teeworlds teeworlds
@@ -51,7 +46,7 @@ RUN apt-get update && apt-get install -y git && \
     apt-get purge -y git && apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy entrypoint and config
+# Copy entrypoint
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
