@@ -1,55 +1,43 @@
-FROM debian:bullseye-slim AS builder
+FROM debian:bookworm-slim AS builder
 
 RUN apt-get update && apt-get install -y \
     build-essential \
+    cmake \
     python3 \
     zlib1g-dev \
     git \
+    libicu-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
 
-# python3 -> python symlink
-RUN ln -s /usr/bin/python3 /usr/bin/python
+# Clone official teeworlds 0.7.5 (CMake, maintained)
+RUN git clone --depth 1 --branch 0.7.5 --recurse-submodules https://github.com/teeworlds/teeworlds.git .
 
-# Install bam 0.4.0 build tool
-RUN git clone https://github.com/matricks/bam.git /tmp/bam && \
-    cd /tmp/bam && \
-    git checkout v0.4.0 && \
-    ./make_unix.sh && \
-    cp bam /usr/local/bin/
-
-# Copy source
-COPY . .
-
-# Build server only
-RUN bam -a server_release
+# Build server only with CMake
+RUN mkdir build && cd build && \
+    cmake .. -DCLIENT=OFF -DCMAKE_BUILD_TYPE=Release && \
+    make -j$(nproc)
 
 # --- Runtime stage ---
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y \
     zlib1g \
+    libicu72 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -d /home/teeworlds teeworlds
 
 WORKDIR /home/teeworlds
 
-# Copy server binary and data
-COPY --from=builder /build/teeworlds_srv .
+# Copy server binary
+COPY --from=builder /build/build/teeworlds_srv .
+
+# Copy data directory (maps included in official repo)
 COPY --from=builder /build/data ./data
-COPY --from=builder /build/storage.cfg .
 
-# Download official maps
-RUN apt-get update && apt-get install -y git && \
-    git clone https://github.com/teeworlds/teeworlds-maps.git /tmp/maps && \
-    cp /tmp/maps/*.map data/maps/ && \
-    rm -rf /tmp/maps && \
-    apt-get purge -y git && apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy entrypoint
+# Copy entrypoint from our fork
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
