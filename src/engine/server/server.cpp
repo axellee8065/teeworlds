@@ -1243,10 +1243,10 @@ int CServer::Run()
 
 	// start server
 	NETADDR BindAddr;
-	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)
+	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_IPV4) == 0)
 	{
-		// sweet!
-		BindAddr.type = NETTYPE_ALL;
+		// use specified bind address with IPv4 only
+		BindAddr.type = NETTYPE_IPV4;
 		BindAddr.port = g_Config.m_SvPort;
 	}
 	else
