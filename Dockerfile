@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /build
 
+# python3 -> python symlink (bam scripts use 'python')
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
 # Install bam 0.4.0 build tool (teeworlds requires 0.4.x, not 0.5.x)
 RUN git clone https://github.com/matricks/bam.git /tmp/bam && \
     cd /tmp/bam && \
