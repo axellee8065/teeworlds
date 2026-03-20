@@ -27,6 +27,7 @@ FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y \
     zlib1g \
+    socat \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -d /home/teeworlds teeworlds
@@ -37,6 +38,10 @@ WORKDIR /home/teeworlds
 COPY --from=builder /build/teeworlds_srv .
 COPY --from=builder /build/data ./data
 COPY --from=builder /build/storage.cfg .
+
+# Copy entrypoint and config
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
 
 # Default server config
 RUN echo 'sv_name "Teeworlds Docker Server"' > autoexec.cfg && \
@@ -50,4 +55,4 @@ USER teeworlds
 
 EXPOSE 8303/udp
 
-CMD ["./teeworlds_srv"]
+CMD ["./entrypoint.sh"]

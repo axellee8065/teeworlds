@@ -1,0 +1,15 @@
+app = "teeworlds-axellee"
+primary_region = "nrt"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[[services]]
+  internal_port = 8303
+  protocol = "udp"
+  [[services.ports]]
+    port = 8303
+
+[vm]
+  size = "shared-cpu-1x"
+  memory = 256
