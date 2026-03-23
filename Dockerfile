@@ -11,10 +11,10 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /build
 
-# Force git:// -> https:// for submodules, then clone official teeworlds 0.7.5
-RUN git config --global url."https://github.com/".insteadOf "git://github.com/" && \
-    git clone --depth 1 --branch 0.7.5 https://github.com/teeworlds/teeworlds.git . && \
-    git submodule update --init --recursive
+# Clone official teeworlds 0.7.5 and manually fetch submodules (git:// blocked)
+RUN git clone --depth 1 --branch 0.7.5 https://github.com/teeworlds/teeworlds.git . && \
+    git clone --depth 1 https://github.com/teeworlds/teeworlds-translation.git datasrc/languages && \
+    git clone --depth 1 https://github.com/teeworlds/teeworlds-maps.git datasrc/maps
 
 # Build server only with CMake
 RUN mkdir build && cd build && \
