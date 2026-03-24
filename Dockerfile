@@ -17,11 +17,8 @@ RUN curl -sL "https://github.com/teeworlds/teeworlds/releases/download/0.7.5/tee
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-# Default server config
-RUN echo 'sv_name "Teeworlds Docker Server"' > autoexec.cfg && \
-    echo 'sv_port 8303' >> autoexec.cfg && \
-    echo 'sv_max_clients 16' >> autoexec.cfg && \
-    echo 'sv_map dm1' >> autoexec.cfg
+# Server config
+COPY autoexec.cfg .
 
 RUN chown -R teeworlds:teeworlds /home/teeworlds
 
