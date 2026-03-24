@@ -1,45 +1,19 @@
-FROM debian:bookworm-slim AS builder
-
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    python3 \
-    zlib1g-dev \
-    git \
-    libicu-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /build
-
-# Clone official teeworlds 0.7.5 and manually fetch submodules (git:// blocked)
-RUN git clone --depth 1 --branch 0.7.5 https://github.com/teeworlds/teeworlds.git . && \
-    git clone --depth 1 https://github.com/teeworlds/teeworlds-translation.git datasrc/languages && \
-    git clone --depth 1 https://github.com/teeworlds/teeworlds-maps.git datasrc/maps
-
-# Build server only with CMake
-RUN mkdir build && cd build && \
-    cmake .. -DCLIENT=OFF -DCMAKE_BUILD_TYPE=Release && \
-    make -j$(nproc)
-
-# --- Runtime stage ---
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y \
-    zlib1g \
-    libicu72 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -d /home/teeworlds teeworlds
 
 WORKDIR /home/teeworlds
 
-# Copy server binary
-COPY --from=builder /build/build/teeworlds_srv .
+# Download official pre-built teeworlds 0.7.5 server
+RUN curl -sL "https://github.com/teeworlds/teeworlds/releases/download/0.7.5/teeworlds-0.7.5-linux_x86_64.tar.gz" \
+    | tar xz --strip-components=1 && \
+    chmod +x teeworlds_srv
 
-# Copy data directory (maps included in official repo)
-COPY --from=builder /build/data ./data
-
-# Copy entrypoint from our fork
+# Copy entrypoint
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
